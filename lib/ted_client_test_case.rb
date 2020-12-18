@@ -14,6 +14,7 @@ require 'time'
 require 'fileutils'
 require 'timeout'
 require 'more_ruby'
+require 'rest-client'
 # require 'watir'
 
 
@@ -112,6 +113,7 @@ module TedClientTestCase
     # Sends the test's result to TED
     def send_result_to_ted(test_name, status, test_end_time, notes)
         ted_result = TEDResult.new
+        ted_result.test_run_identifier = test_end_time # TODO temporary
         ted_result.name = test_name
         ted_result.category = "Test client"
         ted_result.status = status
@@ -119,6 +121,12 @@ module TedClientTestCase
         ted_result.message = notes unless notes.empty?
 
        puts ted_result.to_s
+
+       url = TedClientConfig::SERVER[:ted_url_send_in_result]
+        resp = RestClient.post(url, ted_result.to_json)
+
+        puts resp.code
+        puts resp.body
 
        # TODO send to TED
     end

@@ -28,7 +28,7 @@ class TEDResult
         h[:status] = @status
         h[:timestamp] = @timestamp
         h[:message] = @message if @message != nil
-        h[:test_run_identifier] = @test_run_identifier if @test_run_identifier != nil
+        h[:testRunIdentifier] = @test_run_identifier if @test_run_identifier != nil
 
         JSON.pretty_generate(h)
     end

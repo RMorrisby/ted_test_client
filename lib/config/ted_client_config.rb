@@ -11,8 +11,8 @@ class TedClientConfig
     API_VERSION = "latest"
 
     SERVERS = {
-        :local => {:ted_client_url => "https://localhost:8080"},
-        :test_1 => {:ted_client_url => "https://"},
+        :local => {:ted_url_send_in_result => "http://localhost:8080/result"},
+        :test_1 => {:ted_url_send_in_result => "http://arcane-ravine-69473.herokuapp.com/result"},
     }
 
     SERVER = SERVERS[$TEST_ENV]
