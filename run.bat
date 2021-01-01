@@ -1,0 +1,1 @@
+ruby tests\v1\TED_data_1x.rb WRITE_RESULTS
