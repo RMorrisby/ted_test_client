@@ -58,11 +58,11 @@ module TedClientTestCase
     # end
 
     # if $WRITE_RESULTS # supplied from invokation
-    if $*.include?("WRITE_RESULTS")
-        WRITE_RESULTS = true
-    else
-        WRITE_RESULTS = false
-    end
+    # if $*.include?("WRITE_RESULTS")
+    #     WRITE_RESULTS = true
+    # else
+    #     WRITE_RESULTS = false
+    # end
 
     # Connect to TED CLIENT and reinitialise the context, etc.
     # def tedclient_login(url = TedClientConfig::SERVER[:ted_client_url])
@@ -120,15 +120,14 @@ module TedClientTestCase
         ted_result.timestamp = test_end_time
         ted_result.message = notes unless notes.empty?
 
-       puts ted_result.to_s
+        puts ted_result.to_s
 
-       url = TedClientConfig::SERVER[:ted_url_send_in_result]
+        url = TedClientConfig::SERVER[:ted_url_send_in_result]
+        puts "Now sending POST to #{url}"
         resp = RestClient.post(url, ted_result.to_json)
 
         puts resp.code
         puts resp.body
-
-       # TODO send to TED
     end
 
     # Ensure that every test (that wants one) has a browser that is already logged in to the system
@@ -174,7 +173,9 @@ module TedClientTestCase
 
             puts "Test has now finished; #{test_name} : #{passed?}"
 
-            if WRITE_RESULTS
+            if $WRITE_RESULTS
+                raise "TEST_ENV '#{$TEST_ENV}' was not recognised" if TedClientConfig::SERVER == nil
+
                 puts "Will now write results to #{TedClientConfig::RESULTS_BASE_DIR}"
 
                 notes = ""
@@ -211,7 +212,7 @@ module TedClientTestCase
                 end
 
                 send_result_to_ted(test_name, ted_status, @test_end_time.gmtime, notes)
-            end # end if WRITE_RESULTS
+            end # end if $WRITE_RESULTS
             
             # close_all_browsers
 

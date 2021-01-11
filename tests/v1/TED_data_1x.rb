@@ -18,11 +18,11 @@ class TED_DATA_1 < Test::Unit::TestCase
       ########################################################################
 
 
-  def test_TED_data_1_a  
+  # def test_TED_data_1_a  
+  #   #puts $TEST_ENV
+  #   assert(false, "Test should always fail")
 
-    assert(false, "Test should always fail")
-
-  end
+  # end
 
 
   def test_TED_data_1_b
