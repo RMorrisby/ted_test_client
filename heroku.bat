@@ -1,1 +1,1 @@
-ruby -s tests\v1\TED_data_1x.rb -WRITE_RESULTS=true -TEST_ENV=test_1
+ruby -s tests\v1\TED_data_1.rb -WRITE_RESULTS=true -TEST_ENV=test_1

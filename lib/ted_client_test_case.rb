@@ -124,10 +124,58 @@ module TedClientTestCase
 
         url = TedClientConfig::SERVER[:ted_url_send_in_result]
         puts "Now sending POST to #{url}"
-        resp = RestClient.post(url, ted_result.to_json)
+        # resp = RestClient.post(url, ted_result.to_json)
+        
+        # resource = RestClient::Resource.new(
+        #     url,
+        #     verify_ssl: false
+        #   )
+          
+        #   resp = resource.post(ted_result.to_json)
+
+        
+          resp = RestClient::Request.execute(method: :post, url: url,
+            payload: ted_result.to_json,
+            verify_ssl: false)
 
         puts resp.code
         puts resp.body
+    end
+
+    # Reads in test_run_id_increment.txt - the tests will use this value as the test run ID
+    def read_version_number
+        lines = File.readlines("test_run_id_increment.txt")
+        v = lines[0]
+        puts "Version number in file : " + v
+        v
+    end
+
+
+    # Increments the value in test_run_id_increment.txt
+    def increment_version_number
+        lines = File.readlines("test_run_id_increment.txt") # TODO make constant
+        v = lines[0]
+
+        v =~ /^v(\d+).(\d+).(\d+)$/
+        major = $1.to_i
+        minor = $2.to_i
+        patch = $3.to_i
+
+        patch += 1
+        if patch > 15
+            minor += 1 
+            patch = 0
+        end
+        if minor > 15
+            major += 1 
+            minor = 0
+        end
+        
+        new_v = "v#{major}.#{minor}.#{patch}"
+        File.open("test_run_id_increment.txt", "w") do |f|
+            f.puts new_v
+        end
+        puts "Incremented version number to #{new_v}"
     end
 
     # Ensure that every test (that wants one) has a browser that is already logged in to the system

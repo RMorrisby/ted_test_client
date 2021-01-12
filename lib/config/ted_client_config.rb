@@ -15,6 +15,10 @@ class TedClientConfig
         :test_1 => {:ted_url_send_in_result => "http://arcane-ravine-69473.herokuapp.com/result"},
     }
 
+    # SERVERS = {
+    #     :local => {:ted_url_send_in_result => "https://localhost:8080/result"},
+    #     :test_1 => {:ted_url_send_in_result => "https://arcane-ravine-69473.herokuapp.com/result"},
+    # }
     SERVER = SERVERS[$TEST_ENV]
 
 
