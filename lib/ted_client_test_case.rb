@@ -23,6 +23,8 @@ require 'config/ted_client_config.rb'
 
 # Helpers
 # require 'framework/ted_client.rb'
+require 'framework/ted_suite.rb'
+require 'framework/ted_test.rb'
 require 'framework/ted_result.rb'
 
 
@@ -98,7 +100,7 @@ module TedClientTestCase
     #     end
     # end
 
-
+    @@version = nil
     @@browser = nil
 
     def browser
@@ -113,7 +115,7 @@ module TedClientTestCase
     # Sends the test's result to TED
     def send_result_to_ted(test_name, status, test_end_time, notes)
         ted_result = TEDResult.new
-        ted_result.test_run_identifier = test_end_time # TODO temporary
+        ted_result.test_run_identifier = @@version # @@version is set in setup
         ted_result.name = test_name
         ted_result.category = "Test client"
         ted_result.status = status
@@ -142,18 +144,26 @@ module TedClientTestCase
         puts resp.body
     end
 
+    def get_version_number_file_lines
+        path = File.expand_path(File.dirname(__FILE__)) + "/../" + TedClientConfig::TEST_RUN_ID_FILE
+        lines = File.readlines(path)
+        lines
+    end
+
     # Reads in test_run_id_increment.txt - the tests will use this value as the test run ID
-    def read_version_number
-        lines = File.readlines("test_run_id_increment.txt")
-        v = lines[0]
-        puts "Version number in file : " + v
-        v
+    def load_version_number
+        unless @@version
+            lines = get_version_number_file_lines
+            v = lines[0]
+            puts "Version number in file : " + v
+            @@version = v
+        end
     end
 
 
     # Increments the value in test_run_id_increment.txt
     def increment_version_number
-        lines = File.readlines("test_run_id_increment.txt") # TODO make constant
+        lines = get_version_number_file_lines
         v = lines[0]
 
         v =~ /^v(\d+).(\d+).(\d+)$/
@@ -205,6 +215,8 @@ module TedClientTestCase
         # elsif (@initialBrowser == :none || @initialBrowser == nil)
         #     browser = nil
         # end
+
+        load_version_number
 
     end # end setup
 

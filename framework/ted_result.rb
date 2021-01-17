@@ -1,15 +1,19 @@
 require 'json'
 
 # Class representing a TED test result that is sent to TED
+# This requires TED to already know about the suite and the test (by sending a TEDSuite and TEDTest object)
 class TEDResult
 
+    attr_accessor :suite
     attr_accessor :name
-    attr_accessor :category
+    attr_accessor :test_run # ID for the whole test run, e.g. "v0.1.2 run 3"
     attr_accessor :status # enum # PASSED, FAILED, NOT_RUN, SHOULD_HAVE_RUN, KNOWN_ISSUE, INTERMITTENT
-    attr_accessor :timestamp
+    attr_accessor :start_timestamp
+    attr_accessor :end_timestamp
+    attr_accessor :ran_by
     # Optional fields
     attr_accessor :message
-    attr_accessor :test_run_identifier # ID for the whole test run, e.g. "v0.1.2 run 3"
+
 
     # Valid statuses
     PASSED = "PASSED"
@@ -19,16 +23,16 @@ class TEDResult
     KNOWN_ISSUE = "KNOWN_ISSUE" # used by TED; clients should not send this status
     INTERMITTENT = "INTERMITTENT" # used by TED; clients should not send this status
 
-
-
     def to_json
         h = {}
-        h[:name] = @name
-        h[:category] = @category
-        h[:status] = @status
-        h[:timestamp] = @timestamp
-        h[:message] = @message if @message != nil
-        h[:testRunIdentifier] = @test_run_identifier if @test_run_identifier != nil
+        h[:SuiteName] = @suite
+        h[:Name] = @name
+        h[:TestRunIdentifier] = @test_run
+        h[:Status] = @status
+        h[:StartTimestamp] = @start_timestamp
+        h[:EndTimestamp] = @end_timestamp
+        h[:RanBy] = @ran_by
+        h[:Message] = @message if @message != nil
 
         JSON.pretty_generate(h)
     end

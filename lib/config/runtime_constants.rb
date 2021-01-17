@@ -23,5 +23,7 @@ module RuntimeConstants
     RESULTS_CSV = "results.csv"
     RESULTS_BASE_DIR = "."
 
+    TEST_RUN_ID_FILE = "test_run_id_increment.txt"
+
 end
 

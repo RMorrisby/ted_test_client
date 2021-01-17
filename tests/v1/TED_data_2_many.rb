@@ -6,6 +6,7 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
   include TedClientTestCase
 
   def setup
+    increment_version_number
     super
   end  
   
@@ -21,9 +22,6 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
 
   def test_TED_data_2_many
 
-    increment_version_number
-    version = read_version_number
-
     $WRITE_RESULTS = false # deliberately suppress the teardown's writing of results
 
     # We will cheat here & send directly to TED
@@ -32,7 +30,7 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
 
     count.times do |i|
       ted_result = TEDResult.new
-      ted_result.test_run_identifier = version
+      ted_result.test_run_identifier = @@version
       ted_result.name = self.to_s.split("(")[0] + "_" + (i + 1).to_s
       ted_result.category = "Test client"
       ted_result.status = "PASSED" # TODO randomise this?
