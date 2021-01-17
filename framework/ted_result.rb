@@ -26,7 +26,7 @@ class TEDResult
     def to_json
         h = {}
         h[:SuiteName] = @suite
-        h[:Name] = @name
+        h[:TestName] = @name
         h[:TestRunIdentifier] = @test_run
         h[:Status] = @status
         h[:StartTimestamp] = @start_timestamp

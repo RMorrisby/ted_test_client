@@ -112,55 +112,6 @@ module TedClientTestCase
     end
     alias set_browser browser= # note : calls of "browser = " do not work, calls of "browser=" do
 
-    # Sends the test's result to TED
-    def send_result_to_ted(test_name, status, test_end_time, notes)
-        ted_result = TEDResult.new
-        ted_result.test_run_identifier = @@version # @@version is set in setup
-        ted_result.name = test_name
-        ted_result.category = "Test client"
-        ted_result.status = status
-        ted_result.timestamp = test_end_time
-        ted_result.message = notes unless notes.empty?
-
-        puts ted_result.to_s
-
-        url = TedClientConfig::SERVER[:ted_url_send_in_result]
-        puts "Now sending POST to #{url}"
-        # resp = RestClient.post(url, ted_result.to_json)
-        
-        # resource = RestClient::Resource.new(
-        #     url,
-        #     verify_ssl: false
-        #   )
-          
-        #   resp = resource.post(ted_result.to_json)
-
-        
-          resp = RestClient::Request.execute(method: :post, url: url,
-            payload: ted_result.to_json,
-            verify_ssl: false)
-
-        puts resp.code
-        puts resp.body
-    end
-
-    def get_version_number_file_lines
-        path = File.expand_path(File.dirname(__FILE__)) + "/../" + TedClientConfig::TEST_RUN_ID_FILE
-        lines = File.readlines(path)
-        lines
-    end
-
-    # Reads in test_run_id_increment.txt - the tests will use this value as the test run ID
-    def load_version_number
-        unless @@version
-            lines = get_version_number_file_lines
-            v = lines[0]
-            puts "Version number in file : " + v
-            @@version = v
-        end
-    end
-
-
     # Increments the value in test_run_id_increment.txt
     def increment_version_number
         lines = get_version_number_file_lines
@@ -188,6 +139,167 @@ module TedClientTestCase
         puts "Incremented version number to #{new_v}"
     end
 
+    # Initialise the class variables used for the TEDTest object
+    @@priority = nil
+    @@categories = []
+    @@description = nil
+    @@owner = nil
+    @@notes = nil
+    @@test_file_dir = nil
+    
+
+    # Sends the test's result to TED
+    def register_test_with_ted
+
+        ted_test = TEDTest.new
+        ted_test.name = @test_name
+        ted_test.dir = @@test_file_dir
+        ted_test.priority = @@priority
+        ted_test.categories = @@categories.join("|")
+        ted_test.description = @@description
+        ted_test.notes = @@notes
+        ted_test.owner = @@owner
+    
+        puts ted_test.to_s
+    
+        url = TedClientConfig::SERVER[:ted_url_send_in_test]
+    
+        # Try to get the test from TED; don't send the test in if TED already knows about it
+        query_url = url + "?test=" + ted_test.name
+        puts "Now sending GET to #{query_url}"
+    
+        begin
+            resp = RestClient::Request.execute(method: :get, url: query_url,
+            verify_ssl: false)
+            code = resp.code
+            body = resp.body
+        rescue => e
+            code = e.response.code
+            body = e.response.body
+        end
+        puts code
+        puts body
+        assert_equal(200, resp.code, "GET to fetch test did not return a 200 code")
+    
+        # If the test is not registered, register it
+        if resp.body == "Test '#{ted_test.name}' is not registered in TED"
+            puts "TED does not know about this test; will now send it to TED"
+        
+            puts "Now sending POST to #{url}"
+            begin
+                resp = RestClient::Request.execute(method: :post, url: url,
+                    payload: ted_test.to_json,
+                    verify_ssl: false)
+                code = resp.code
+                body = resp.body
+            rescue => e
+                code = e.response.code
+                body = e.response.body
+            end
+            puts code
+            puts body
+        
+            unless code == 201
+                puts "TED rejected the test registration with code #{code}. This test was sent :"
+                puts ted_test
+            end
+    
+        else 
+            received = JSON.parse(resp.body)
+            expected = JSON.parse(ted_test.to_s)
+    
+            # Our object ('expected') shouldn't have the Known Issue fields. But TED should return an object with them
+            # Take the values for those fields, so that the assertion doesn't trip over them
+            expected["IsKnownIssue"] ||= received["IsKnownIssue"]
+            expected["KnownIssueDescription"] ||= received["KnownIssueDescription"]
+            expected["Notes"] ||= "" # TED currently returns "" instead of nil
+            assert_equal(expected, received, "GET to fetch test did not return the expected values. Something has gone wrong.")
+        end
+
+        
+        # ##################################
+
+        # puts ted_test.to_s
+
+        # url = TedClientConfig::SERVER[:ted_url_send_in_test]
+        # puts "Now sending POST to #{url}"
+
+        # begin
+        #     resp = RestClient::Request.execute(method: :post, url: url,
+        #         payload: ted_test.to_json,
+        #         verify_ssl: false)
+        #     code = resp.code
+        #     body = resp.body
+        # rescue => e
+        #     code = e.response.code
+        #     body = e.response.body
+        # end
+
+        # puts code
+        # puts body
+
+        # unless code == 201
+        #     puts "TED rejected the test registration with code #{code}. This test was sent :"
+        #     puts ted_test
+        # end
+    end
+
+    # Sends the test's result to TED
+    def send_result_to_ted(test_name, status, test_start_time, test_end_time, notes)
+
+        ted_result = TEDResult.new
+        ted_result.suite = TedClientConfig::DEFAULT_SUITE_NAME
+        ted_result.name = test_name
+        ted_result.test_run = @@version # @@version is set in setup
+        ted_result.status = status
+        ted_result.start_timestamp = test_start_time
+        ted_result.end_timestamp = test_end_time
+        ted_result.ran_by = TedClientConfig::DEFAULT_OWNER
+        ted_result.message = notes unless notes.empty?
+
+        puts ted_result.to_s
+
+        url = TedClientConfig::SERVER[:ted_url_send_in_result]
+        puts "Now sending POST to #{url}"
+
+        begin
+            resp = RestClient::Request.execute(method: :post, url: url,
+                payload: ted_result.to_json,
+                verify_ssl: false)
+            code = resp.code
+            body = resp.body
+        rescue => e
+            code = e.response.code
+            body = e.response.body
+        end
+
+        puts code
+        puts body
+
+        unless code == 201
+            puts "TED rejected the test result with code #{code}. This result was sent :"
+            puts ted_result
+        end
+    end
+
+    def get_version_number_file_lines
+        path = File.expand_path(File.dirname(__FILE__)) + "/../" + TedClientConfig::TEST_RUN_ID_FILE
+        lines = File.readlines(path)
+        lines
+    end
+
+    # Reads in test_run_id_increment.txt - the tests will use this value as the test run ID
+    def load_version_number
+        unless @@version
+            lines = get_version_number_file_lines
+            v = lines[0]
+            puts "Version number in file : " + v
+            @@version = v
+        end
+    end
+
+
+
     # Ensure that every test (that wants one) has a browser that is already logged in to the system
     def setup
 
@@ -200,6 +312,8 @@ module TedClientTestCase
 
         # Get the directory that the specific test lives in, so that it can be included in the results file
         @test_file_dir = @test_file.split(File::SEPARATOR)[-2] if @test_file
+
+        @test_name = self.to_s.split("(")[0]
 
         # Select default certificate if none is configured
         @certificate ||= :regular
@@ -218,6 +332,7 @@ module TedClientTestCase
 
         load_version_number
 
+        register_test_with_ted
     end # end setup
 
     # Close all browsers and write the result of the test to the results CSV
@@ -271,7 +386,7 @@ module TedClientTestCase
                     puts "Had to rescue from writing results to file #{TedClientConfig::RESULTS_CSV}"
                 end
 
-                send_result_to_ted(test_name, ted_status, @test_end_time.gmtime, notes)
+                send_result_to_ted(test_name, ted_status, @test_start_time.gmtime, @test_end_time.gmtime, notes)
             end # end if $WRITE_RESULTS
             
             # close_all_browsers

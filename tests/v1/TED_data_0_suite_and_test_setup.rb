@@ -26,9 +26,9 @@ class TED_DATA_0_SUITE_AND_TEST_SETUP < Test::Unit::TestCase
 
     # Send the suite first
     ted_suite = TEDSuite.new
-    ted_suite.name = "Test client 1"
+    ted_suite.name = TedClientConfig::DEFAULT_SUITE_NAME
     ted_suite.description = "Test suite for testing TED with"
-    ted_suite.owner = "RSM"
+    ted_suite.owner = TedClientConfig::DEFAULT_OWNER
     ted_suite.notes = ""
 
     puts ted_suite.to_s
@@ -80,7 +80,7 @@ class TED_DATA_0_SUITE_AND_TEST_SETUP < Test::Unit::TestCase
     ted_test.categories = %w{smoke basic}.join("|")
     ted_test.description = "TED client test 1"
     ted_test.notes = ""
-    ted_test.owner = "RSM"
+    ted_test.owner = TedClientConfig::DEFAULT_OWNER
 
     puts ted_test.to_s
 

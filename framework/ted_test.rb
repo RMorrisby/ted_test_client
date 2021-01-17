@@ -10,7 +10,7 @@ class TEDTest
     attr_accessor :priority # num from 1 to 5 (VH, H, M, L, VL)
     attr_accessor :categories # pipe-separated string
     attr_accessor :description
-    attr_accessor :notes
+    attr_accessor :notes # optional
     attr_accessor :owner
     attr_accessor :is_known_issue # optional
     attr_accessor :known_issue_description  # optional

@@ -24,6 +24,10 @@ module RuntimeConstants
     RESULTS_BASE_DIR = "."
 
     TEST_RUN_ID_FILE = "test_run_id_increment.txt"
+    DEFAULT_SUITE_NAME = "Test client 1"
+    DEFAULT_OWNER = "RSM"
 
+
+    
 end
 

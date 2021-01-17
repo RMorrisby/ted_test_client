@@ -1,0 +1,1 @@
+ruby -s tests\v1\TED_data_0_suite_and_test_setup.rb -WRITE_RESULTS=false -TEST_ENV=local
