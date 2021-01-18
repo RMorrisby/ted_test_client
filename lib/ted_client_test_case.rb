@@ -207,6 +207,13 @@ module TedClientTestCase
         else 
             received = JSON.parse(resp.body)
             expected = JSON.parse(ted_test.to_s)
+            
+            # Need to set some default values
+            # TED will return nils as empty strings, and Priority as 0
+            expected["Priority"] ||= 0
+            expected.each_pair do |k, v|
+                expected[k] = "" if v == nil
+            end
     
             # Our object ('expected') shouldn't have the Known Issue fields. But TED should return an object with them
             # Take the values for those fields, so that the assertion doesn't trip over them

@@ -6,7 +6,8 @@ class TED_DATA_0_SUITE_AND_TEST_SETUP < Test::Unit::TestCase
   include TedClientTestCase
 
   def setup
-    super
+    # Do not call super - we do not want to register this 'test' with TED
+    # super
   end  
   
       ########################################################################

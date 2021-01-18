@@ -5,9 +5,17 @@ require 'ted_client_test_case'
 class TED_DATA_2_MANY < Test::Unit::TestCase
   include TedClientTestCase
 
+  @@priority = 2
+  @@categories = %w{basic}
+  @@description = "TED Client test 2 - multiple test results"
+  @@owner = "RSM"
+  @@test_file_dir = File.dirname(__FILE__).split("/")[-1]
+  
   def setup
-    increment_version_number
-    super
+    increment_version_number # TODO tests should not call this - the suite-setup should (and only once per suite-run)
+    load_version_number
+    # super # Do not call super - we do not want to register this 'test' with TED
+    @test_start_time = Time.now
   end  
   
       ########################################################################
@@ -29,13 +37,32 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
     count = 4 # TODO read count from commandline
 
     count.times do |i|
+      # First, we will need to register the test
+      
+      # Set these @@ then call register_test_with_ted
+
+      @test_name = self.to_s.split("(")[0] + "_" + (i + 1).to_s
+      ted_test = TEDTest.new
+      ted_test.name = @test_name
+      ted_test.dir = @@test_file_dir
+      ted_test.priority = @@priority
+      ted_test.categories = @@categories.join("|")
+      ted_test.description = @@description
+      ted_test.notes = @@notes
+      ted_test.owner = @@owner
+      
+      register_test_with_ted
+
+
       ted_result = TEDResult.new
-      ted_result.test_run_identifier = @@version
+      ted_result.suite = TedClientConfig::DEFAULT_SUITE_NAME
       ted_result.name = self.to_s.split("(")[0] + "_" + (i + 1).to_s
-      ted_result.category = "Test client"
+      ted_result.test_run = @@version
       ted_result.status = "PASSED" # TODO randomise this?
-      ted_result.timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S")
-      ted_result.message = ""
+      ted_result.start_timestamp = (Time.now - 5).strftime("%Y-%m-%d %H:%M:%S")
+      ted_result.end_timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+      ted_result.ran_by = TedClientConfig::DEFAULT_OWNER
+      # ted_result.message = ""
 
       puts ted_result.to_s
 
@@ -58,8 +85,8 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
       puts resp.code
       puts resp.body
     end # end count
+
+    @test_end_time = Time.now
   end
-
-
 
 end
