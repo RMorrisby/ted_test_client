@@ -15,11 +15,13 @@ class TedClientConfig
             :ted_url_send_in_result => "http://localhost:8080/result", 
             :ted_url_send_in_suite => "http://localhost:8080/suite",
             :ted_url_send_in_test => "http://localhost:8080/test",
+            :ted_url_reruns => "http://localhost:8080/reruns", 
         },
         :test_1 => {
             :ted_url_send_in_result => "http://arcane-ravine-69473.herokuapp.com/result",
             :ted_url_send_in_suite => "http://arcane-ravine-69473.herokuapp.com/suite",
             :ted_url_send_in_test => "http://arcane-ravine-69473.herokuapp.com/test",
+            :ted_url_reruns => "http://arcane-ravine-69473.herokuapp.com/reruns",
         },
     }
 

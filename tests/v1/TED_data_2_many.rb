@@ -41,13 +41,14 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
     # end # end count
 
     statuses = %w{ PASSED FAILED }
+    @expected_reruns = []
 
     suffix = "always_pass"
     status = "PASSED"
     send_to_ted(suffix, status)
 
     suffix = "always_fail"
-    status = "PASSED"
+    status = "FAILED"
     send_to_ted(suffix, status)
 
     suffix = "pass_or_fail"
@@ -60,6 +61,31 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
     puts "Status was decided to be nil; will not send to TED" if status == nil
     send_to_ted(suffix, status)
 
+
+    # Now get the list of reruns
+    @expected_reruns.uniq!
+    puts "Expected reruns : " + @expected_reruns.join(", ")
+
+    url = TedClientConfig::SERVER[:ted_url_reruns]
+    url += "?testrun=#{@@version}"
+    puts "Now sending GET to #{url}"
+    
+    resp = RestClient::Request.execute(method: :get, url: url,
+        verify_ssl: false)
+
+    puts resp.code
+    puts resp.body
+
+      reruns = JSON.parse(resp.body)
+      assert_equal(@expected_reruns.size, reruns.size, "Wrong number of reruns returned from TED")
+
+      found_reruns = []
+      reruns.each do |hash|
+        found_reruns << hash["TestName"]
+      end
+
+      found_reruns.uniq!
+      assert_equal(@expected_reruns.sort, found_reruns.sort, "Wrong reruns returned from TED")
 
     @test_end_time = Time.now
   end
@@ -94,6 +120,8 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
 
     puts ted_result.to_s
 
+    @expected_reruns << ted_result.name if ted_result.status != "PASSED"
+
     url = TedClientConfig::SERVER[:ted_url_send_in_result]
     puts "Now sending POST to #{url}"
     
@@ -103,5 +131,5 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
 
     puts resp.code
     puts resp.body
-      end
+  end
 end
