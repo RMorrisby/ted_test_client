@@ -13,6 +13,7 @@ class TEDResult
     attr_accessor :ran_by
     # Optional fields
     attr_accessor :message
+    attr_accessor :overwrite # bool
 
 
     # Valid statuses
@@ -33,6 +34,7 @@ class TEDResult
         h[:EndTimestamp] = @end_timestamp
         h[:RanBy] = @ran_by
         h[:Message] = @message if @message != nil
+        h[:Overwrite] = @overwrite if @overwrite != nil
 
         JSON.pretty_generate(h)
     end
