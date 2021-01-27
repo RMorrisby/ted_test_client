@@ -48,7 +48,7 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
     status = "PASSED"
     send_to_ted(suffix, status)
 
-    suffix = "always_fail"
+    suffix = "always_fail" # don't rerun this test
     status = "FAILED"
     send_to_ted(suffix, status)
 
@@ -106,6 +106,7 @@ class TED_DATA_2_MANY < Test::Unit::TestCase
     assert_equal(@expected_reruns.sort, found_reruns.sort, "Wrong reruns returned from TED")
 
     # Now send reruns to TED
+    @expected_rerun_suffixes.delete("always_fail") # deliberately don't rerun this test
     @expected_rerun_suffixes.each do |suffix|
       if suffix =~ /fail/
         status = "FAILED"
