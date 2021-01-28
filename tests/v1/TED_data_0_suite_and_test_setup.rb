@@ -10,6 +10,11 @@ class TED_DATA_0_SUITE_AND_TEST_SETUP < Test::Unit::TestCase
     # super
   end  
   
+  def teardown
+    # Do not call teardown - we do not want to send this test's 'result' to TED
+    # super
+  end  
+  
       ########################################################################
       # PURPOSE :
       #   Create the default project in TED and register the default set of tests
